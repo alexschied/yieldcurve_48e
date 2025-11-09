@@ -1,3 +1,11 @@
+# Ignore everything inside data folders except the folders themselves
+data/raw/*
+data/processed/*
+
+# Keep the empty folders
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
