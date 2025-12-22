@@ -1,3 +1,6 @@
+# Mac sys files
+*.DS_Store
+
 # Ignore everything inside data folders except the folders themselves
 data/raw/*
 data/processed/*

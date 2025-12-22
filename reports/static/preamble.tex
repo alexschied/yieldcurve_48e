@@ -1,0 +1,149 @@
+% ---- PDF engine setting (must be before \documentclass)
+\pdfminorversion=7
+
+% ---- Meta
+\newcommand{\mytopic}{Master Thesis}
+\newcommand{\mytitle}{Sentiment towards Minimum Wages \\ A case study in German newspaper data}
+\title{\mytitle}
+
+\newcommand{\mysemester}{SoSe 2025}
+\newcommand{\myname}{Alexander Schied}
+\author{\myname}
+\newcommand{\mymatrikelnr}{Matrikelnr. 12292440}
+\newcommand{\myacknowledgements}{Submitted in partial fulfillment of the requirements for the degree of M.Sc.}
+\newcommand{\mysupervisor}{Andreas Peichl, Lilly Fischer}
+\newcommand{\mydeclaration}{Hiermit versichere ich, dass ich die vorliegende Arbeit selbständig und ohne Benutzung anderer als der angegebenen Hilfsmittel angefertigt, noch nicht einer anderen Prüfungsbehörde vorgelegt und noch nicht veröffentlicht habe. Zu den genutzten Hilfsmitteln zählt die Verwendung generativer KI. Sie fand Anwendung bei der Generierung von Boilerplate-Code (z. B. zur Formatierung von Tabellen und Grafiken), bei der Strukturierung relevanter Quellen der Literaturanalyse, sowohl in der initialen Suche als auch in der späteren Identifizierung von Zusammenhängen. Außerdem wurde DeepL Write genutzt, um den Text auf Rechtschreibung zu prüfen und die Wortwahl stellenweise an einen akademischen Standard anzupassen. Darüber hinaus fand sie Anwendung beim Debuggen von Fehlermeldungen während der Codeerstellung. Die Struktur des Codes wurde jedoch eigenständig entwickelt.}
+
+\newcommand{\note}[1]{%
+  \textbf{\textcolor{orange}{\large [TODO: #1]}} %
+}
+
+% ---- Core layout
+\usepackage[a4paper, width=160mm, top=35mm, bottom=30mm, bindingoffset=0mm]{geometry}
+\usepackage[T1]{fontenc}          % <- fixes German „…“ and better hyphenation
+\usepackage[utf8]{inputenc}       % pdflatex: keep harmless
+\usepackage[english]{babel}
+\usepackage{csquotes}             % \enquote{…} picks correct style per language
+\usepackage{lmodern,textcomp}
+\usepackage{microtype}
+
+% ---- Graphics, colors, floats
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{float}
+
+% ---- Tables & captions
+\usepackage{threeparttable}
+\usepackage{longtable}
+\usepackage[justification=centering]{caption}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{booktabs, adjustbox, rotating}
+
+% ---- Math & theorems
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Note}
+\newtheorem{proposition}{Proposition}
+\renewcommand{\qedsymbol}{qed.}
+\makeatletter
+\renewenvironment{proof}[1][\proofname]{\par
+  \pushQED{\qed}%
+  \normalfont \topsep6\p@\@plus6\p@\relax
+  \trivlist
+  \item[\hskip\labelsep \bfseries #1\@addpunct{.}]\ignorespaces
+}{%
+  \popQED\endtrivlist\@endpefalse
+}
+\makeatother
+\usepackage{dsfont}
+
+% ---- Graphics & plots
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\pgfplotsset{compat=newest}
+\usetikzlibrary{positioning, arrows.meta}
+\usepgfplotslibrary{fillbetween}
+
+% ---- Text utilities
+\usepackage{alltt}
+\usepackage{tcolorbox}
+\tcbset{
+  mybox/.style={
+    colback=gray!5!white,
+    colframe=blue!75!black,
+    coltitle=blue!75!black,
+    fonttitle=\bfseries,
+    colbacktitle=white,
+    boxrule=0.2mm,
+    sharp corners,
+    fontupper=\small,
+  }
+}
+
+% ---- Code listings (your dark theme)
+\usepackage{listings}
+\definecolor{backcolour}{rgb}{0.15, 0.15, 0.15}
+\definecolor{codegreen}{rgb}{0.4, 0.85, 0.4}
+\definecolor{codegray}{rgb}{0.6, 0.6, 0.6}
+\definecolor{codepurple}{rgb}{0.75, 0.5, 1}
+\definecolor{keywordcolor}{rgb}{0.3, 0.6, 1}
+\definecolor{linenumbercolor}{rgb}{0.5, 0.5, 0.7}
+\definecolor{stringcolor}{rgb}{1, 0.55, 0.4}
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{backcolour},
+  commentstyle=\color{codegreen}\textit,
+  keywordstyle=\color{keywordcolor}\bfseries,
+  numberstyle=\tiny\color{linenumbercolor},
+  stringstyle=\color{stringcolor},
+  basicstyle=\ttfamily\small\color{white},
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=true,
+  numbers=left,
+  numbersep=8pt,
+  frame=single,
+  framesep=6pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=4,
+  rulecolor=\color{linenumbercolor}
+}
+\lstset{style=mystyle}
+
+% ---- Bibliography BEFORE hyperref (good with natbib)
+\usepackage[round, comma]{natbib}
+
+% ---- Hyperlinks (load near the end)
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=black,
+  citecolor=black
+}
+
+% ---- Headers/footers (after hyperref is fine)
+\usepackage{fancyhdr}
+\newcommand{\changefont}{\fontsize{8}{11}\selectfont}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[R]{\changefont{\mytitle}}
+\fancyfoot{}
+\fancyfoot[R]{\thepage}
+\setlength{\headheight}{20pt}   % <- was 14.5pt; fixes fancyhdr warnings
+
+% ---- Paragraphs & spacing
+\usepackage{ragged2e}
+\setlength{\parindent}{20pt}
+\interfootnotelinepenalty=10000
+\linespread{1.5}
+
+% ---- Misc quality-of-life
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\setcounter{tocdepth}{2}
