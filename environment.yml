@@ -1,0 +1,20 @@
+name: ec48e-recession
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - matplotlib
+  - seaborn
+  - statsmodels
+  - jupyterlab
+  - notebook
+  - pyyaml
+  - tqdm
+  - pip
+  - pip:
+      - fredapi
+      - xgboost
