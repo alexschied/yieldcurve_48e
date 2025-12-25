@@ -43,3 +43,15 @@ def build_dataset(start, end):
     df["spread_10y_2y"] = df["y_10y"] - df["y_2y"]
 
     return add_regime_dummies(df)
+
+
+def add_forward_target(df: pd.DataFrame, horizon: int) -> pd.DataFrame:
+    out = df.copy()
+    out = out.dropna(subset=["recession"]).copy()
+
+    out["target"] = out["recession"].shift(-horizon)
+    out = out.dropna(subset=["target"]).copy()
+
+    out["target"] = out["target"].astype(int)
+    out["recession"] = out["recession"].astype(int)
+    return out

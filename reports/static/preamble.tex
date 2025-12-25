@@ -2,17 +2,12 @@
 \pdfminorversion=7
 
 % ---- Meta
-\newcommand{\mytopic}{Master Thesis}
-\newcommand{\mytitle}{Sentiment towards Minimum Wages \\ A case study in German newspaper data}
+\newcommand{\mytopic}{48E SP.TP.IN FINAN.ECON.&MACHINE LEARN.}
+\newcommand{\mytitle}{Recession Forecasting - Yield Curve and ML}
 \title{\mytitle}
 
-\newcommand{\mysemester}{SoSe 2025}
-\newcommand{\myname}{Alexander Schied}
+\newcommand{\myname}{Mehmet Zahid Duran, Selim Kir, Alexander Schied}
 \author{\myname}
-\newcommand{\mymatrikelnr}{Matrikelnr. 12292440}
-\newcommand{\myacknowledgements}{Submitted in partial fulfillment of the requirements for the degree of M.Sc.}
-\newcommand{\mysupervisor}{Andreas Peichl, Lilly Fischer}
-\newcommand{\mydeclaration}{Hiermit versichere ich, dass ich die vorliegende Arbeit selbständig und ohne Benutzung anderer als der angegebenen Hilfsmittel angefertigt, noch nicht einer anderen Prüfungsbehörde vorgelegt und noch nicht veröffentlicht habe. Zu den genutzten Hilfsmitteln zählt die Verwendung generativer KI. Sie fand Anwendung bei der Generierung von Boilerplate-Code (z. B. zur Formatierung von Tabellen und Grafiken), bei der Strukturierung relevanter Quellen der Literaturanalyse, sowohl in der initialen Suche als auch in der späteren Identifizierung von Zusammenhängen. Außerdem wurde DeepL Write genutzt, um den Text auf Rechtschreibung zu prüfen und die Wortwahl stellenweise an einen akademischen Standard anzupassen. Darüber hinaus fand sie Anwendung beim Debuggen von Fehlermeldungen während der Codeerstellung. Die Struktur des Codes wurde jedoch eigenständig entwickelt.}
 
 \newcommand{\note}[1]{%
   \textbf{\textcolor{orange}{\large [TODO: #1]}} %
@@ -20,12 +15,24 @@
 
 % ---- Core layout
 \usepackage[a4paper, width=160mm, top=35mm, bottom=30mm, bindingoffset=0mm]{geometry}
-\usepackage[T1]{fontenc}          % <- fixes German „…“ and better hyphenation
-\usepackage[utf8]{inputenc}       % pdflatex: keep harmless
+\usepackage[T1]{fontenc}          
+\usepackage[utf8]{inputenc}       
 \usepackage[english]{babel}
-\usepackage{csquotes}             % \enquote{…} picks correct style per language
+\usepackage{csquotes}             
 \usepackage{lmodern,textcomp}
 \usepackage{microtype}
+
+% ---- FONT & PAGE NUMBERING CONTROL ----
+\usepackage{etoolbox}
+\usepackage[scaled=0.92]{helvet} % Loads Helvetica
+\newbool{usehelvetica}
+\setbool{usehelvetica}{true}     % <--- CHANGE TO {false} TO SWITCH BACK TO SERIF
+
+\ifbool{usehelvetica}{
+    \renewcommand{\familydefault}{\sfdefault}
+    \usepackage[helvet]{sfmath}  % Makes math match Helvetica
+}{}
+% ---------------------------------------
 
 % ---- Graphics, colors, floats
 \usepackage{graphicx}
@@ -84,7 +91,7 @@
   }
 }
 
-% ---- Code listings (your dark theme)
+% ---- Code listings
 \usepackage{listings}
 \definecolor{backcolour}{rgb}{0.15, 0.15, 0.15}
 \definecolor{codegreen}{rgb}{0.4, 0.85, 0.4}
@@ -116,10 +123,10 @@
 }
 \lstset{style=mystyle}
 
-% ---- Bibliography BEFORE hyperref (good with natbib)
+% ---- Bibliography
 \usepackage[round, comma]{natbib}
 
-% ---- Hyperlinks (load near the end)
+% ---- Hyperlinks
 \usepackage{hyperref}
 \hypersetup{
   colorlinks=true,
@@ -128,7 +135,7 @@
   citecolor=black
 }
 
-% ---- Headers/footers (after hyperref is fine)
+% ---- Headers/footers
 \usepackage{fancyhdr}
 \newcommand{\changefont}{\fontsize{8}{11}\selectfont}
 \pagestyle{fancy}
@@ -136,7 +143,7 @@
 \fancyhead[R]{\changefont{\mytitle}}
 \fancyfoot{}
 \fancyfoot[R]{\thepage}
-\setlength{\headheight}{20pt}   % <- was 14.5pt; fixes fancyhdr warnings
+\setlength{\headheight}{20pt}   
 
 % ---- Paragraphs & spacing
 \usepackage{ragged2e}
