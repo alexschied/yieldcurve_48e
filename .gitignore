@@ -1,13 +1,20 @@
 # Mac sys files
 *.DS_Store
 
+outputs/
+
 # Ignore everything inside data folders except the folders themselves
 data/raw/*
 data/processed/*
+reports/figures/*
+reports/tables/*
 
 # Keep the empty folders
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!reports/figures/.gitkeep
+!reports/tables/.gitkeep
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

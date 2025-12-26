@@ -1,0 +1,33 @@
+To assess regime dependence, models are evaluated separately on the COVID-19 recession (2019--2021) and the Global Financial Crisis (2007--2009). Figures~\ref{fig:covid-f2} and~\ref{fig:gfc-f2} report F2 scores, emphasizing recall, while Figures~\ref{fig:covid-pr} and~\ref{fig:gfc-pr} report precision--recall AUC.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/fig_top_F2_COVID_test_2019_2021.png}
+    \caption{Top F2 scores during the COVID-19 recession.}
+    \label{fig:covid-f2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/fig_top_F2_GFC_test_2007_2009.png}
+    \caption{Top F2 scores during the Global Financial Crisis.}
+    \label{fig:gfc-f2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/fig_top_PR_AUC_COVID_test_2019_2021.png}
+    \caption{Top PR-AUC scores during the COVID-19 recession.}
+    \label{fig:covid-pr}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/fig_top_PR_AUC_GFC_test_2007_2009.png}
+    \caption{Top PR-AUC scores during the Global Financial Crisis.}
+    \label{fig:gfc-pr}
+\end{figure}
+
+Table~\ref{tab:scenario_results} summarizes scenario-specific results numerically.
+
+\input{tables/model_results_scenarios.tex}

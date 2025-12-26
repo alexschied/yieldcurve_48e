@@ -18,5 +18,6 @@ class Config:
     threshold_min: float = 0.001
     threshold_max: float = 0.999
 
-    outdir: str = "outputs/ec48e_outputs_full"
-    random_state: int = 42
+    outdir: str = "reports/figures"
+    tabledir: str = "reports/tables"
+    random_state: int = 187

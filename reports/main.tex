@@ -9,19 +9,15 @@
 
 % Title ---------------------------------------------------------------------
 
-\input{static/frontpage}  % fancy title page
+\maketitle
+\thispagestyle{empty} % Removes the number from the title page
 
-%\maketitle         % simple header
+\begin{abstract}
+This paper evaluates a recession forecasting pipeline designed to predict U.S. National Bureau of Economic Research (NBER) recessions twelve months ahead. The framework integrates information from the Treasury yield curve, macroeconomic indicators, labor market variables, credit spreads, and explicit term premium decompositions. Principal component analysis (PCA) is used to extract interpretable yield curve factors, whose stability is examined through rolling-window diagnostics. Forecasting models are evaluated under strict temporal discipline using expanding-window cross-validation and out-of-sample threshold selection. Results show that yield curve slope and curvature factors are highly informative for financially driven recessions such as the Global Financial Crisis, while macroeconomic variables dominate performance during abrupt shock episodes such as the COVID-19 recession. The findings highlight the regime-dependent nature of recession signals and the importance of separating expectations-driven yield movements from term premium distortions.
+\end{abstract}
 
-% Table of CONTENTS ---------------------------------------------------------------------
 \newpage
-\tableofcontents
-% include material overview
-% \newpage
-% \listoffigures
-% \newpage
-% \listoftables
-\newpage
+\pagenumbering{arabic} % Restarts the counter and sets the style to arabic (1, 2, 3...)
 
 % CHAPTERS ---------------------------------------------------------------------
 
@@ -29,70 +25,30 @@
 
 \section{Introduction}
 \label{sec:intro}
-\input{chapters/intro.tex}
-% -------------------
+\input{sections/intro.tex}
 
-\section{Institutional Setting}
-\label{sec:setting}
-\input{chapters/setting.tex}
 
-% -------------------
-
-\section{Literature Review}
-\label{sec:review}
-
-\subsection{Effects of Minimum Wages in Germany}
-\label{sec:review:effects}
-\input{chapters/review_minwage.tex}
-
-\subsection{NLP driven Sentiment Analysis in Economics}
-\label{sec:review:senti}
-\input{chapters/review_senti.tex}
-
-% -------------------
-
-\section{Data}
+\section{Data and Target Construction}
 \label{sec:data}
-\input{chapters/data.tex}
-
-% -------------------
-
-\section{Empirical Strategy}
-\label{sec:methodology}
-
-\subsection{Sentiment Analysis}
-\label{sec:methodology:senitment}
-\input{chapters/senti_analysis.tex}
-
-\subsection{Fixed Effects Setup}
-\label{sec:methodology:did}
-\input{chapters/did_setup.tex}
-% -------------------
-
-\section{Results}
-\label{sec:results}
-
-\subsection{Descriptive Results}
-\label{sec:results:descriptives}
-\input{chapters/descriptives.tex}
+\input{sections/data.tex}
 
 
-\subsection{Fixed Effects Results}
-\label{sec:results:inference}
-\input{chapters/inference.tex}
 
-% -------------------
+\section{Principal Component Analysis of the Yield Curve}
+\label{sec:pca}
+\input{sections/pca.tex}
+
+\section{Scenario Analysis: COVID-19 and the Global Financial Crisis}
+\label{sec:scenario}
+\input{sections/scenarios.tex}
 
 \section{Discussion}
-\label{sec:robustness}
-\input{chapters/robustness.tex}
-
-% -------------------
+\label{sec:discussion}
+\input{sections/discussion.tex}
 
 \section{Conclusion}
 \label{sec:conclusion}
-\input{chapters/conclusion.tex}
-
+\input{sections/conclusion.tex}
 \newpage
 % ------------------------------------------------------------------------------
 % APPENDIX ---------------------------------------------------------------------
@@ -108,31 +64,6 @@
 \addtocontents{toc}{\protect\setcounter{tocdepth}{1}} % article
 
 
-\section{Data Preparation Steps}
-\label{app:data}
-\input{chapters/appendix/dataprep.tex}
-
-\section{Natural Language Processing}
-\label{app:nlp}
-\input{chapters/appendix/nlp.tex}
-
-%\section{Descriptive}
-%\label{app:desc}
-%\input{chapters/appendix/descriptives.tex}
-
-
-% \section{List of Figures and Tables}
-% \label{LTF}
-% \input{Chapters/Figures and Tables}
-
-% \subsection*{Figures}
-% \label{Figures}
-% \input{Chapters/Figures}
-
-% \clearpage
-% \subsection*{Tables}
-% \label{Tables}
-% \input{Chapters/Tables}
 
 % \clearpage
 % ------------------------------------------------------------------------------
@@ -141,32 +72,6 @@
 
 \RaggedRight
 \bibliographystyle{dcu}
-\bibliography{static/Masterarbeit}
-
-\newpage
-% ------------------------------------------------------------------------------
-% DECLARATION OF AUTHORSHIP-----------------------------------------------------
-% ------------------------------------------------------------------------------
- \vspace{1cm}
- \Large
- \noindent
- \textbf{Declaration of authorship} 
- \vspace{0.5cm}
- \noindent
- \normalsize
-
-\mydeclaration
-
- \vspace{1cm}
- \textcolor{black}{Munich, \today}, Alexander Schied\\
- \vspace{1cm}
-
-\includegraphics[width = 0.4\textwidth]{static/unterschrift.jpeg}\\
-
-\noindent\rule{0.5\textwidth}{0.4pt} \\
-
-\textcolor{gray}{Location, Date, Name}
-
-% ------------------------------------------------------------------------------
+\bibliography{static/bibliography}
 
 \end{document}
