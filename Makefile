@@ -11,7 +11,6 @@ env:
 run:
 	conda run -n $(ENV) python -m experiments.run_full_pipeline
 
-
 tables:
 	conda run -n $(ENV) python experiments/export_tables.py
 

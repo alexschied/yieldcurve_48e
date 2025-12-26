@@ -13,7 +13,7 @@
 \thispagestyle{empty} % Removes the number from the title page
 
 \begin{abstract}
-    Your abstract content here.
+This paper evaluates a recession forecasting pipeline designed to predict U.S. National Bureau of Economic Research (NBER) recessions twelve months ahead. The framework integrates information from the Treasury yield curve, macroeconomic indicators, labor market variables, credit spreads, and explicit term premium decompositions. Principal component analysis (PCA) is used to extract interpretable yield curve factors, whose stability is examined through rolling-window diagnostics. Forecasting models are evaluated under strict temporal discipline using expanding-window cross-validation and out-of-sample threshold selection. Results show that yield curve slope and curvature factors are highly informative for financially driven recessions such as the Global Financial Crisis, while macroeconomic variables dominate performance during abrupt shock episodes such as the COVID-19 recession. The findings highlight the regime-dependent nature of recession signals and the importance of separating expectations-driven yield movements from term premium distortions.
 \end{abstract}
 
 \newpage
@@ -28,6 +28,27 @@
 \input{sections/intro.tex}
 
 
+\section{Data and Target Construction}
+\label{sec:data}
+\input{sections/data.tex}
+
+
+
+\section{Principal Component Analysis of the Yield Curve}
+\label{sec:pca}
+\input{sections/pca.tex}
+
+\section{Scenario Analysis: COVID-19 and the Global Financial Crisis}
+\label{sec:scenario}
+\input{sections/scenarios.tex}
+
+\section{Discussion}
+\label{sec:discussion}
+\input{sections/discussion.tex}
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{sections/conclusion.tex}
 \newpage
 % ------------------------------------------------------------------------------
 % APPENDIX ---------------------------------------------------------------------
