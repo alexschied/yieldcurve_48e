@@ -6,7 +6,8 @@ def df_to_latex_table(
     outpath: str,
     caption: str,
     label: str,
-    float_format="%.3f"
+    float_format="%.3f",
+    longtable: bool = False
 ):
     """
     Export a publication-ready LaTeX table.
@@ -19,8 +20,8 @@ def df_to_latex_table(
         float_format=float_format,
         caption=caption,
         label=label,
-        longtable=False,
-        escape=False,
+        longtable=longtable,
+        escape=True,
         column_format="l" + "c" * (len(df.columns) - 1)
     )
 

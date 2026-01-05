@@ -15,7 +15,10 @@ tables:
 	conda run -n $(ENV) python experiments/export_tables.py
 
 report:
-	cd reports && pdflatex main.tex
+	cd reports && pdflatex main
+	cd reports && bibtex main
+	cd reports && pdflatex main
+	cd reports && pdflatex main
 
 clean:
 	rm -rf outputs reports/figures/*.pdf reports/tables/*.tex

@@ -4,6 +4,38 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
+def make_feature_sets(df, pc_df):
+    fsets = {}
+
+    fsets["spreads"] = df[["spread_10y_3m", "spread_10y_2y", "target"]].dropna()
+    fsets["yield_pca"] = pc_df.join(df["target"]).dropna()
+
+    return fsets
+
+def compute_pca(df, yield_cols, n_components=3):
+    X = df[yield_cols].dropna()
+    Xs = StandardScaler().fit_transform(X)
+
+    pca = PCA(n_components=n_components)
+    pcs = pca.fit_transform(Xs)
+
+    pc_df = pd.DataFrame(
+        pcs, index=X.index,
+        columns=[f"PC{i+1}" for i in range(n_components)]
+    )
+
+    loadings = pd.DataFrame(
+        pca.components_.T,
+        index=yield_cols,
+        columns=pc_df.columns
+    )
+
+    evr = pd.Series(
+        pca.explained_variance_ratio_,
+        index=pc_df.columns
+    )
+
+    return pc_df, loadings, evr
 
 def rolling_pca_loadings(df: pd.DataFrame, yield_cols: List[str],
                          window_months: int = 120, step: int = 1,
@@ -34,25 +66,3 @@ def rolling_pca_loadings(df: pd.DataFrame, yield_cols: List[str],
         f"PC{k}": pd.DataFrame(pc_loadings[k], index=pd.DatetimeIndex(times))
         for k in [1, 2, 3]
     }
-
-
-def plot_rolling_drift(roll_loadings: Dict[str, pd.DataFrame],
-                       outprefix: str,
-                       window_months: int = 120):
-    for pc_name, Ldf in roll_loadings.items():
-        plt.figure(figsize=(12, 5))
-
-        for col in Ldf.columns:
-            plt.plot(Ldf.index, Ldf[col], label=col)
-
-        # QE/ZLB highlight
-        plt.axvspan(pd.Timestamp("2008-12-01"), pd.Timestamp("2015-12-01"), alpha=0.12)
-        plt.title(f"Rolling PCA Loading Drift — {pc_name} (window={window_months}m)")
-        plt.xlabel("Window end date")
-        plt.ylabel("Loading")
-        plt.grid(True, alpha=0.3)
-        plt.legend(ncol=3, fontsize=7)
-        plt.tight_layout()
-        plt.savefig(f"{outprefix}_{pc_name}.png", dpi=180)
-        plt.close()
-
