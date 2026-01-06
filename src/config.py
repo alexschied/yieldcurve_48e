@@ -5,15 +5,15 @@ import pandas as pd
 
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, RidgeClassifier
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.calibration import CalibratedClassifierCV
 
 try:
     from xgboost import XGBClassifier
     XGB_AVAILABLE = True
 except ImportError:
     XGB_AVAILABLE = False
-
 
 @dataclass
 class Config:
@@ -73,22 +73,20 @@ class Config:
             "D_ZLB_QE": ("2008-12-01", "2015-12-01")
         })
 
-
-
 @dataclass(frozen=True)
 class ModelSuite:
     logistic: Pipeline
+    ridge: Pipeline
+    elastic_net: Pipeline
     random_forest: RandomForestClassifier
     grad_boost: GradientBoostingClassifier
     xgboost: Optional[Any] = None
 
     def get_model(self, name: str, y_train: pd.Series = None) -> Any:
-        """
-        Returns a specific model by name. 
-        If it's XGBoost, it automatically handles scale_pos_weight based on y_train.
-        """
         models = {
             "Logistic": self.logistic,
+            "Ridge": self.ridge,
+            "ElasticNet": self.elastic_net,
             "RandomForest": self.random_forest,
             "GradBoost": self.grad_boost,
             "XGBoost": self.xgboost
@@ -98,11 +96,9 @@ class ModelSuite:
         if mdl is None:
             return None
 
-        # Special handling for XGBoost scaling
         if name == "XGBoost" and y_train is not None:
             pos = y_train.sum()
             neg = len(y_train) - pos
-            # We return a clone/new instance with the specific weight for this fold
             params = mdl.get_params()
             params["scale_pos_weight"] = neg / max(pos, 1)
             return XGBClassifier(**params)
@@ -110,58 +106,55 @@ class ModelSuite:
         return mdl
 
     def get_names(self) -> list:
-        names = ["Logistic", "RandomForest", "GradBoost"]
+        names = ["Logistic", "Ridge", "ElasticNet", "RandomForest", "GradBoost"]
         if self.xgboost:
             names.append("XGBoost")
         return names
 
 def define_models(CFG) -> ModelSuite:
+    # Standard Logistic (L2)
     logistic = Pipeline([
         ("scaler", StandardScaler()),
         ("clf", LogisticRegression(
-            penalty="elasticnet",
-            solver="saga",
-            l1_ratio=0.5,
-            C=1.0,
-            class_weight="balanced",
-            max_iter=2000,
+            penalty="l2", C=1.0, class_weight="balanced", 
+            max_iter=2000, random_state=CFG.random_state
+        ))
+    ])
+
+    # Ridge Classifier (Wrapped for probabilities)
+    ridge = Pipeline([
+        ("scaler", StandardScaler()),
+        ("clf", CalibratedClassifierCV(
+            RidgeClassifier(class_weight="balanced", random_state=CFG.random_state),
+            cv=3
+        ))
+    ])
+
+    # Elastic Net
+    elastic_net = Pipeline([
+        ("scaler", StandardScaler()),
+        ("clf", LogisticRegression(
+            penalty="elasticnet", solver="saga", l1_ratio=0.5,
+            C=1.0, class_weight="balanced", max_iter=5000, 
             random_state=CFG.random_state
         ))
     ])
 
     rf = RandomForestClassifier(
-        n_estimators=600,
-        max_depth=6,
-        min_samples_leaf=6,
-        class_weight="balanced_subsample",
-        random_state=CFG.random_state,
-        n_jobs=-1
+        n_estimators=600, max_depth=6, min_samples_leaf=6,
+        class_weight="balanced_subsample", random_state=CFG.random_state, n_jobs=-1
     )
 
     gb = GradientBoostingClassifier(
-        n_estimators=400,
-        learning_rate=0.05,
-        max_depth=3,
-        random_state=CFG.random_state
+        n_estimators=400, learning_rate=0.05, max_depth=3, random_state=CFG.random_state
     )
 
     xgb = None
     if XGB_AVAILABLE:
         xgb = XGBClassifier(
-            n_estimators=600,
-            learning_rate=0.03,
-            max_depth=3,
-            subsample=0.85,
-            colsample_bytree=0.85,
-            reg_lambda=1.0,
-            objective="binary:logistic",
-            eval_metric="logloss",
-            random_state=CFG.random_state
+            n_estimators=600, learning_rate=0.03, max_depth=3,
+            subsample=0.85, colsample_bytree=0.85, reg_lambda=1.0,
+            objective="binary:logistic", eval_metric="logloss", random_state=CFG.random_state
         )
 
-    return ModelSuite(
-        logistic=logistic,
-        random_forest=rf,
-        grad_boost=gb,
-        xgboost=xgb
-    )
+    return ModelSuite(logistic, ridge, elastic_net, rf, gb, xgb)

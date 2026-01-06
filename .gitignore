@@ -8,6 +8,7 @@ data/raw/*
 data/processed/*
 reports/figures/*
 reports/tables/*
+reports/build/
 
 # Keep the empty folders
 !data/raw/.gitkeep

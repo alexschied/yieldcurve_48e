@@ -1,3 +1,64 @@
+\subsection{Models}
+To analyze the relationship the yield curve with recessions, we employ a broad set of machine learning estimators. As a baseline estimator we use a simple Logistic regression.
+
+\subsubsection{Regularization Approaches}
+
+We employ regularization-driven estimation to identify the optimal linear predictors while mitigating the risk of overfitting through the application of $L_1$ and $L_2$ penalty terms, commonly referred to as selection and shrinkage, respectively. Specifically, we utilize a Ridge estimator, which relies on $L_2$ regularization to perform coefficient shrinkage, and an Elastic Net estimator, which incorporates a weighted combination of both $L_1$ and $L_2$ penalties. The Ridge regression estimator is defined by the following optimization objective, which introduces the $L_2$ penalty to the residual sum of squares:
+\begin{equation}
+\hat{\beta}_{Ridge} = \underset{\beta}{\text{argmin}} \left\{ \sum_{i=1}^{n} (y_i - x_i^T \beta)^2 + \lambda \sum_{j=1}^{p} \beta_j^2 \right\}
+\end{equation}
+
+The Elastic Net estimator bridges the gap between Ridge and Lasso by incorporating a mixing parameter $\alpha \in [0, 1]$, which balances the $L_1$ and $L_2$ penalties:
+\begin{equation}
+\hat{\beta}_{EN} = \underset{\beta}{\text{argmin}} \left\{ \frac{1}{2n} \|y - X\beta\|^2_2 + \lambda \left( \alpha \|\beta\|_1 + \frac{1-\alpha}{2} \|\beta\|^2_2 \right) \right\}
+\end{equation}
+
+To adapt these methods for classification, the optimization objective replaces the squared error used in regression with a log-likelihood loss function (log-loss) while maintaining the $L_1$ and $L_2$ penalty structures to constrain the model's coefficients.
+\begin{equation}
+\min_{w} \underbrace{\sum_{i=1}^{n} \log(1 + e^{-y_i x_i^T w})}_{\text{Classification Loss}} + \underbrace{\lambda \left[ \rho \|w\|_1 + \frac{1-\rho}{2} \|w\|_2^2 \right]}_{\text{Regularization Penalty}}
+\end{equation}
+
+Given that our feature set is constructed based on a priori economic rationale and supported by established academic literature, we hypothesize that automated feature selection may provide limited utility in this context. This assumption would be empirically supported if the Ridge estimator demonstrates predictive performance comparable or superior to that of the Elastic Net.
+
+\subsubsection{Random Forests}
+We include tree-based methods to strengthen our approach by relying on their non-parametric estimation properties. At their core, these methods estimate the conditional expectation $E[Y|X]$ by recursively partitioning the feature space into disjoint regions and assigning a constant value to each. For regression tasks, the model estimates the conditional average of the target variable within each leaf node, while in classification, the estimate represents the conditional probability of a class, which is effectively the conditional average of the class indicator variables. While a single tree approximates these averages through a simple local mean, ensemble architectures like Random Forest and Gradient Boosting enhance this estimation by either averaging across multiple independent partitions to reduce variance or sequentially refining the conditional mean to minimize a global loss function.
+
+While both Random Forest and Boosting are ensemble methods based on decision trees, they differ fundamentally in how they combine learners. Random Forest uses bagging to build independent trees in parallel and averages their results to reduce variance, whereas Gradient Boosting and XGBoost employ boosting to build trees sequentially, with each new tree attempting to correct the errors of its predecessor. 
+
+Specifically, XGBoost enhances the standard Gradient Boosting framework by incorporating $L_1$ and $L_2$ regularization directly into the objective function and utilizing a more efficient second-order Taylor expansion to optimize the loss. We anticipate that these boosting methods will capture complex interactions better than the Random Forest, provided the learning rate is sufficiently controlled to prevent overfitting.
+
+
+Following ensemble logic and the Law of Large Numbers, whereby an aggregation of weakly correlated weak learners can yield a strong learner, the Random Forest prediction is defined simple average of $M$ independent trees:
+\begin{equation}
+\hat{y} = \frac{1}{M} \sum_{m=1}^{M} T_m(x)
+\end{equation}
+
+
+In contrast, Gradient Boosting produce an additive prediction where each step adds a small correction (weighted by the learning rate $\eta$):
+\begin{equation}
+\hat{y}_{new} = \hat{y}_{old} + \eta \cdot T_{next}(x)
+\end{equation}
+
+
+XGBoost further refines this by minimizing a regularized objective function that penalizes model complexity ($\Omega$):
+\begin{equation}
+\mathcal{L} = \sum \text{Loss}(y_i, \hat{y}_i) + \sum \Omega(T_m)
+\end{equation}
+
+
+\subsection{Holdout run}
+To ensure the predictive validity of the forecasting pipeline, models are subjected to a rigorous holdout testing framework. This procedure is essential for evaluating the generalizability of machine learning architectures—ranging from regularized linear models like Ridge and ElasticNet to ensemble methods such as Random Forest and XGBoost—on unseen data windows. The primary objective of the holdout test is to simulate a real-world forecasting environment, thereby mitigating the risks of information leakage and overfitting that frequently occur when modeling low-frequency economic transitions. Given the inherent class imbalance of recessionary periods, performance is assessed using metrics that emphasize signal detection over raw accuracy, notably Balanced Accuracy, Recall, and the Precision-Recall Area Under the Curve (PR_AUC).
+
+As demonstrated in Table \ref{tab:h}, model performance exhibits significant sensitivity to both the feature set composition and the holdout fraction. Notably, models utilizing the yield\_pca feature set—incorporating extracted factors for level, slope, and curvature—consistently outperform those relying solely on raw spreads in terms of Balanced Accuracy and PR\_AUC across various test fractions. For instance, at a 0.200 test fraction, the ElasticNet model with PCA factors achieves a Balanced Accuracy of 0.824 and a perfect Recall, suggesting a high degree of sensitivity to the pre-recession signals embedded in the latent yield curve dynamics. Conversely, complex gradient-boosted architectures often exhibit lower recall in the holdout set unless carefully regularized, underscoring the "Genuine Forecasting Challenge" of predicting transitions twelve months in advance. These results reinforce the conclusion that yield curve principal components provide a more robust basis for out-of-sample recession forecasting than individual maturity spreads.
+Table~\ref{tab:holdout} reports holdout performance across multiple train--test splits.
+
+\input{tables/holdout.tex}
+\label{tab:holdout}
+
+
+
+\subsection{Scenario Analysis: COVID-19 and the Global Financial Crisis}
+
 To assess regime dependence, models are evaluated separately on the COVID-19 recession (2019--2021) and the Global Financial Crisis (2007--2009). Figures~\ref{fig:covid-f2} and~\ref{fig:gfc-f2} report F2 scores, emphasizing recall, while Figures~\ref{fig:covid-pr} and~\ref{fig:gfc-pr} report precision--recall AUC.
 
 \begin{figure}[H]
@@ -31,3 +92,7 @@ To assess regime dependence, models are evaluated separately on the COVID-19 rec
 Table~\ref{tab:scenario_results} summarizes scenario-specific results numerically.
 
 \input{tables/model_results_scenarios.tex}
+
+The scenario-based evaluation reveals significant regime dependence in the predictive power of yield curve factors. During the Global Financial Crisis (GFC) of 2007–2009, models leveraging principal component analysis (PCA) factors consistently outperformed those using raw maturity spreads, underscoring the informative value of slope and curvature for financially driven recessions. Specifically, the Ridge model with yield\_pca features achieved a Balanced Accuracy of 0.833 and a Recall of 0.722, significantly higher than the 0.694 Balanced Accuracy and 0.444 Recall obtained using raw spreads. This alignment with traditional financial theory—where yield curve inversions effectively signal impending contractions—is further evidenced by the robust ROC\_AUC (0.938) and PR\_AUC (0.878) scores for the PCA-based Ridge model.
+
+In contrast, the COVID-19 recession (2019–2021) represents a structural break where traditional yield signals were often lagging indicators of an abrupt, exogenous shock. Performance during this period was characterized by high Recall but lower Precision, reflecting the challenges of predicting a lockdown-induced downturn compared to an endogenous credit-cycle peak. While the ElasticNet and Logistic models with yield\_pca features both achieved a Recall of 1.000, their PR\_AUC values (0.174) were considerably lower than those seen during the GFC, with the exception of the Random Forest model which exhibited a perfect PR\_AUC of 1.000. This disparity reinforces the importance of regime-aware modeling, as unconventional monetary policies and term premium distortions in the post-2010 era have complicated the interpretation of latent yield factors.
