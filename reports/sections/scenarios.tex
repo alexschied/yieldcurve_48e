@@ -52,7 +52,7 @@ To ensure the predictive validity of the forecasting pipeline, models are subjec
 As demonstrated in Table \ref{tab:h}, model performance exhibits significant sensitivity to both the feature set composition and the holdout fraction. Notably, models utilizing the yield\_pca feature set—incorporating extracted factors for level, slope, and curvature—consistently outperform those relying solely on raw spreads in terms of Balanced Accuracy and PR\_AUC across various test fractions. For instance, at a 0.200 test fraction, the ElasticNet model with PCA factors achieves a Balanced Accuracy of 0.824 and a perfect Recall, suggesting a high degree of sensitivity to the pre-recession signals embedded in the latent yield curve dynamics. Conversely, complex gradient-boosted architectures often exhibit lower recall in the holdout set unless carefully regularized, underscoring the "Genuine Forecasting Challenge" of predicting transitions twelve months in advance. These results reinforce the conclusion that yield curve principal components provide a more robust basis for out-of-sample recession forecasting than individual maturity spreads.
 Table~\ref{tab:holdout} reports holdout performance across multiple train--test splits.
 
-\input{tables/holdout.tex}
+\input{tables/holdout_adjusted.tex}
 \label{tab:holdout}
 
 
@@ -63,17 +63,12 @@ To assess regime dependence, models are evaluated separately on the COVID-19 rec
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.85\textwidth]{figures/fig_top_F2_COVID_test_2019_2021.pdf}
+    \includegraphics[width=0.85\textwidth]{figures/fig_importance_comparison_subplots.pdf}
     \caption{Top F2 scores during the COVID-19 recession.}
-    \label{fig:covid-f2}
+    \label{fig:importance}
 \end{figure}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/fig_top_F2_GFC_test_2007_2009.pdf}
-    \caption{Top F2 scores during the Global Financial Crisis.}
-    \label{fig:gfc-f2}
-\end{figure}
+The feature importance analysis demonstrates a clear divergence between the two economic regimes, validating the paper's core finding that recession signals are structurally dependent on the nature of the crisis. During the Global Financial Crisis (GFC), the slope factor (PC2) and the spread\_10y\_3m represent the most critical variables for the majority of models, particularly the Logistic and ElasticNet estimators. This dominance aligns with the characterization of the GFC as a financially driven recession where the erosion of the term premium and subsequent yield curve inversion served as primary barometers. In contrast, the COVID-19 scenario reveals a shift in importance toward PC1 (Level) and PC3 (Curvature), illustrating a structural break from traditional signals. The heightened relevance of the curvature factor (PC3) in the COVID-19 plot reflects the episodic spikes caused by intense policy intervention and stimulus programs that distorted the expectations-driven signals of the yield curve. These visual results provide empirical backing for the rolling PCA diagnostics, which show significant factor loading drift during these periods and underscore why models must be regime-aware to predict transitions effectively.
 
 \begin{figure}[H]
     \centering
@@ -91,7 +86,7 @@ To assess regime dependence, models are evaluated separately on the COVID-19 rec
 
 Table~\ref{tab:scenario_results} summarizes scenario-specific results numerically.
 
-\input{tables/model_results_scenarios.tex}
+\input{tables/scenarios_adjusted.tex}
 
 The scenario-based evaluation reveals significant regime dependence in the predictive power of yield curve factors. During the Global Financial Crisis (GFC) of 2007–2009, models leveraging principal component analysis (PCA) factors consistently outperformed those using raw maturity spreads, underscoring the informative value of slope and curvature for financially driven recessions. Specifically, the Ridge model with yield\_pca features achieved a Balanced Accuracy of 0.833 and a Recall of 0.722, significantly higher than the 0.694 Balanced Accuracy and 0.444 Recall obtained using raw spreads. This alignment with traditional financial theory—where yield curve inversions effectively signal impending contractions—is further evidenced by the robust ROC\_AUC (0.938) and PR\_AUC (0.878) scores for the PCA-based Ridge model.
 

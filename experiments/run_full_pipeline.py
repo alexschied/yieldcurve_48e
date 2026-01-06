@@ -15,9 +15,9 @@ from src.evaluation.oof import oof_probs_train_only
 from src.evaluation.metrics import predict_proba, compute_metrics, optimize_threshold
 from src.visualizations import (
     plot_top_scenario_results, plot_pc_timeseries, plot_loadings_heatmap,
-    plot_scree, plot_yield_curve, plot_rolling_drift
+    plot_scree, plot_yield_curve, plot_rolling_drift, plot_importance_subplots
 )
-from src.utils import df_to_latex_table
+from src.utils import df_to_latex_table, extract_importance
 
 # ---------------------------------------------------------
 # CACHING LOGIC
@@ -130,6 +130,7 @@ def main():
 
     # Scenario Tests Loop
     scenario_rows = []
+    importance_records = []
     for scen_name, (tr_e, te_s, te_e) in CFG.scenarios.items():
         for fset, dff in feature_sets.items():
             train_df, test_df = scenario_split(dff, tr_e, te_s, te_e)
@@ -151,18 +152,35 @@ def main():
                     mdl.fit(Xtr, ytr.values)
                     joblib.dump({'mdl': mdl, 'thr_opt': thr_opt}, cp)
 
-                #plot_feature_interpretation(mdl, Xtr, mname, scen_name, CFG.outdir)
+                X_cols = Xtr.columns.tolist()
+                imp_series = extract_importance(mdl, X_cols, mname)
+                
+                for feat, val in imp_series.items():
+                    importance_records.append({
+                        "Scenario": scen_name,
+                        "Model": mname,
+                        "FeatureSet": fset,
+                        "Feature": feat,
+                        "Importance": val
+                    })
+
                 prob_te = predict_proba(mdl, Xte)
                 scenario_rows.append({"Scenario": scen_name, "FeatureSet": fset, "Model": mname, **compute_metrics(yte, prob_te, thr_opt)})
 
     # Final Outputs
     scen_df = pd.DataFrame(scenario_rows)
     df_to_latex_table(pd.DataFrame(holdout_rows), os.path.join(CFG.tabledir, "holdout.tex"), "Holdout", "tab:h", longtable=True)
-    df_to_latex_table(scen_df, os.path.join(CFG.tabledir, "scenarios.tex"), "Scenarios", "tab:s")
+    df_to_latex_table(scen_df, os.path.join(CFG.tabledir, "scenarios.tex"), "Scenarios", "tab:s", longtable=True)
 
     if not scen_df.empty:
         for scen_name in scen_df["Scenario"].unique():
             plot_top_scenario_results(scen_df, "PR_AUC", scen_name, CFG.outdir)
+
+
+    all_importance_df = pd.DataFrame(importance_records)
+
+    if not all_importance_df.empty:
+        plot_importance_subplots(all_importance_df, CFG.outdir)
 
     print(f"Pipeline finished. Data saved in {CFG.outdir} and {CFG.tabledir}")
 

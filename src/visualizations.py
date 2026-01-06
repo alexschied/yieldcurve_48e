@@ -3,6 +3,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import seaborn as sns
 
 from typing import Dict
 from pathlib import Path
@@ -45,6 +46,38 @@ def shade_recessions(ax, rec_series, alpha=0.12):
 # =========================================================
 # Plots
 # =========================================================
+def plot_importance_subplots(importance_df, outpath):
+    """
+    Erstellt ein Subplot-Layout (1 Reihe, n Szenarien) für die Feature-Wichtigkeit.
+    """
+    scenarios = importance_df['Scenario'].unique()
+    fig, axes = plt.subplots(1, len(scenarios), figsize=(16, 7), sharey=True)
+    
+    if len(scenarios) == 1: axes = [axes]
+
+    for i, scen in enumerate(scenarios):
+        ax = axes[i]
+        sub_data = importance_df[importance_df['Scenario'] == scen]
+        
+        # Durchschnittliche Wichtigkeit pro Feature in diesem Szenario
+        sns.barplot(
+            data=sub_data, 
+            x='Importance', 
+            y='Feature', 
+            hue='Model', 
+            ax=ax,
+            palette='muted'
+        )
+        
+        ax.set_title(f"Scenario: {scen}", fontsize=12, fontweight='bold')
+        ax.set_xlabel("Relative Importance")
+        if i > 0: ax.set_ylabel("") # 
+        ax.grid(axis='x', linestyle='--', alpha=0.6)
+
+    plt.suptitle("Vergleich der Feature-Wichtigkeit: GFC vs. COVID", fontsize=15, y=1.02)
+    plt.tight_layout()
+    plt.savefig(Path(outpath) / "fig_importance_comparison_subplots.pdf", bbox_inches='tight')
+    plt.close()
 
 def plot_top_scenario_results(
     df: pd.DataFrame,

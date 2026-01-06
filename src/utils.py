@@ -1,6 +1,33 @@
 import pandas as pd
 from pathlib import Path
 
+def extract_importance(model, feature_names, model_name):
+    """
+    Extrahiert Feature-Wichtigkeit basierend auf dem Modelltyp.
+    """
+    import numpy as np
+    import pandas as pd
+
+    # Pipeline-Extraktion (für Logistic, Ridge, ElasticNet)
+    if hasattr(model, 'named_steps'):
+        clf = model.named_steps['clf']
+        # Spezialfall für CalibratedClassifierCV (Ridge)
+        if hasattr(clf, 'calibrated_classifiers_'):
+            # Durchschnitt der Koeffizienten der internen Klassifikatoren
+            coefs = np.mean([c.estimator.coef_ for c in clf.calibrated_classifiers_], axis=0)
+        else:
+            coefs = clf.coef_
+        importance = np.abs(coefs).flatten()
+    
+    # Baum-Modelle (RF, GradBoost, XGBoost)
+    elif hasattr(model, 'feature_importances_'):
+        importance = model.feature_importances_
+    
+    else:
+        return pd.Series()
+
+    return pd.Series(importance, index=feature_names)
+
 def df_to_latex_table(
     df: pd.DataFrame,
     outpath: str,
