@@ -45,21 +45,132 @@ XGBoost further refines this by minimizing a regularized objective function that
 \mathcal{L} = \sum \text{Loss}(y_i, \hat{y}_i) + \sum \Omega(T_m)
 \end{equation}
 
+\subsubsection{Metric Definitions}
+\begin{itemize}
+    \item \textbf{ROC\_AUC}: Measures the model's discriminative ability across all possible thresholds to separate signal from noise.
+    \item \textbf{PR\_AUC}: Focuses on the precision of crisis predictions relative to recall to penalize false alarms.
+    \item \textbf{Balanced Accuracy (BalAcc)}: The arithmetic mean of Recall and Specificity, ensuring the model is penalized for ignoring unlikely recession events.
+    \item \textbf{F2 Score}: A weighted average of Precision and Recall that prioritizes capturing crises over perfect precision.
+\end{itemize}
 
-\subsection{Holdout run}
-To ensure the predictive validity of the forecasting pipeline, models are subjected to a rigorous holdout testing framework. This procedure is essential for evaluating the generalizability of machine learning architectures—ranging from regularized linear models like Ridge and ElasticNet to ensemble methods such as Random Forest and XGBoost—on unseen data windows. The primary objective of the holdout test is to simulate a real-world forecasting environment, thereby mitigating the risks of information leakage and overfitting that frequently occur when modeling low-frequency economic transitions. Given the inherent class imbalance of recessionary periods, performance is assessed using metrics that emphasize signal detection over raw accuracy, notably Balanced Accuracy, Recall, and the Precision-Recall Area Under the Curve (PR_AUC).
+\subsection{Holdout Run}
+\subsubsection{Short Term Holdout (Test Fraction 0.20)}
+This period is likely dominated by post-GFC low-rate environments. The \textbf{Yield PCA (Logistic)} model achieved the highest performance (0.819 BalAcc, 0.213 F2) because PCA-cleared data allows simpler models to outperform complex ones like XGBoost. It successfully captured subtle curvature signals that were lost in the noisy \texttt{spread\_only} dataset. In contrast, the \textbf{Macro Only} model (0.530 BalAcc) indicates that real-sector data like unemployment was too slow for this short window.
 
-As demonstrated in Table \ref{tab:h}, model performance exhibits significant sensitivity to both the feature set composition and the holdout fraction. Notably, models utilizing the yield\_pca feature set—incorporating extracted factors for level, slope, and curvature—consistently outperform those relying solely on raw spreads in terms of Balanced Accuracy and PR\_AUC across various test fractions. For instance, at a 0.200 test fraction, the ElasticNet model with PCA factors achieves a Balanced Accuracy of 0.824 and a perfect Recall, suggesting a high degree of sensitivity to the pre-recession signals embedded in the latent yield curve dynamics. Conversely, complex gradient-boosted architectures often exhibit lower recall in the holdout set unless carefully regularized, underscoring the "Genuine Forecasting Challenge" of predicting transitions twelve months in advance. These results reinforce the conclusion that yield curve principal components provide a more robust basis for out-of-sample recession forecasting than individual maturity spreads.
-Table~\ref{tab:holdout} reports holdout performance across multiple train--test splits.
+\begin{table}[h!]
+\centering
+\caption{Holdout Sensitivity: Test Size 0.20}
+\small
+\begin{tabular}{@{}llllll@{}}
+\toprule
+\textbf{Feature Set} & \textbf{Model} & \textbf{ROC\_AUC} & \textbf{PR\_AUC} & \textbf{BalAcc} & \textbf{F2} \\ \midrule
+Spreads Only & Logistic & 0.676 & 0.043 & 0.500 & 0.089 \\
+& RandomForest & 0.613 & 0.036 & 0.353 & 0.000 \\
+& GradBoost & 0.627 & 0.038 & 0.368 & 0.000 \\
+& XGBoost & 0.544 & 0.030 & 0.730 & 0.154 \\ \midrule
+Yield PCA & Logistic & 0.681 & 0.044 & 0.819 & 0.213 \\
+& RandomForest & 0.667 & 0.042 & 0.500 & 0.089 \\
+& GradBoost & 0.804 & 0.069 & 0.500 & 0.000 \\
+& XGBoost & 0.627 & 0.038 & 0.417 & 0.000 \\ \midrule
+Macro Only & Logistic & 0.505 & 0.029 & 0.530 & 0.097 \\
+& RandomForest & 0.525 & 0.031 & 0.571 & 0.105 \\
+& GradBoost & 0.389 & 0.024 & 0.480 & 0.000 \\
+& XGBoost & 0.793 & 0.066 & 0.495 & 0.000 \\ \midrule
+PCA + Macro & Logistic & 0.581 & 0.035 & 0.677 & 0.135 \\
+& RandomForest & 0.677 & 0.044 & 0.621 & 0.118 \\
+& GradBoost & 0.763 & 0.058 & 0.485 & 0.000 \\
+& XGBoost & 0.783 & 0.063 & 0.629 & 0.152 \\ \midrule
+PCA Macro Extras & Logistic & 0.512 & 0.036 & 0.585 & 0.128 \\
+& RandomForest & 0.549 & 0.039 & 0.500 & 0.109 \\
+& GradBoost & 0.360 & 0.036 & 0.457 & 0.000 \\
+& XGBoost & 0.378 & 0.028 & 0.287 & 0.000 \\ \bottomrule
+\end{tabular}
+\end{table}
 
-\input{tables/holdout_adjusted.tex}
-\label{tab:holdout}
 
+\subsubsection{Medium Term Holdout (Test Fraction 0.30)}
+Covering the post-COVID recovery, this period saw noisy financial signals due to Quantitative Easing and Term Premium distortions. The \textbf{Yield PCA Gradient Boosting} model was the top performer (0.833 BalAcc, 0.928 ROC\_AUC) due to its ability to model complex nonlinear relations in noisy environments. However, the \textbf{PCA + Macro (Logistic)} model (0.787 BalAcc) is considered a safer, more stable choice for general usage as macro indicators rescued the model from failing financial signals.
+
+
+\begin{table}[h!]
+\centering
+\caption{Holdout Sensitivity: Test Size 0.30}
+\small
+\begin{tabular}{@{}llllll@{}}
+\toprule
+\textbf{Feature Set} & \textbf{Model} & \textbf{ROC\_AUC} & \textbf{PR\_AUC} & \textbf{BalAcc} & \textbf{F2} \\ \midrule
+Spreads Only & Logistic & 0.788 & 0.044 & 0.513 & 0.063 \\
+& RandomForest & 0.631 & 0.025 & 0.611 & 0.078 \\
+& GradBoost & 0.641 & 0.026 & 0.507 & 0.062 \\
+& XGBoost & 0.559 & 0.021 & 0.489 & 0.056 \\ \midrule
+Yield PCA & Logistic & 0.791 & 0.045 & 0.507 & 0.062 \\
+& RandomForest & 0.637 & 0.026 & 0.549 & 0.068 \\
+& GradBoost & 0.928 & 0.154 & 0.833 & 0.164 \\
+& XGBoost & 0.765 & 0.040 & 0.735 & 0.110 \\ \midrule
+Macro Only & Logistic & 0.683 & 0.030 & 0.730 & 0.110 \\
+& RandomForest & 0.737 & 0.036 & 0.663 & 0.090 \\
+& GradBoost & 0.567 & 0.022 & 0.487 & 0.000 \\
+& XGBoost & 0.893 & 0.084 & 0.493 & 0.000 \\ \midrule
+PCA + Macro & Logistic & 0.710 & 0.033 & 0.787 & 0.135 \\
+& RandomForest & 0.800 & 0.047 & 0.657 & 0.088 \\
+& GradBoost & 0.773 & 0.042 & 0.500 & 0.000 \\
+& XGBoost & 0.840 & 0.057 & 0.660 & 0.139 \\ \midrule
+PCA Macro Extras & Logistic & 0.698 & 0.038 & 0.758 & 0.143 \\
+& RandomForest & 0.698 & 0.038 & 0.601 & 0.109 \\
+& GradBoost & 0.560 & 0.027 & 0.355 & 0.000 \\
+& XGBoost & 0.597 & 0.029 & 0.399 & 0.000 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Long Term Holdout (Test Fraction 0.40)}
+This period includes major structural breaks like the 2008 GFC and COVID-19. The \textbf{Macro Only (Logistic)} model excelled (0.857 BalAcc) as instantly reacting unemployment and production data during shutdowns increased macro performance. While the Pure Yield PCA model failed due to the exogenous nature of the COVID shock, the \textbf{PCA + Macro (Logistic)} model (0.824 BalAcc) remains a robust candidate for prediction.
+
+\begin{table}[h!]
+\centering
+\caption{Holdout Sensitivity: Test Size 0.40}
+\small
+\begin{tabular}{@{}llllll@{}}
+\toprule
+\textbf{Feature Set} & \textbf{Model} & \textbf{ROC\_AUC} & \textbf{PR\_AUC} & \textbf{BalAcc} & \textbf{F2} \\ \midrule
+Spreads Only & Logistic & 0.552 & 0.062 & 0.494 & 0.146 \\
+& RandomForest & 0.464 & 0.051 & 0.516 & 0.160 \\
+& GradBoost & 0.492 & 0.052 & 0.426 & 0.000 \\
+& XGBoost & 0.469 & 0.051 & 0.489 & 0.116 \\ \midrule
+Yield PCA & Logistic & 0.562 & 0.063 & 0.527 & 0.167 \\
+& RandomForest & 0.500 & 0.057 & 0.501 & 0.150 \\
+& GradBoost & 0.482 & 0.062 & 0.560 & 0.195 \\
+& XGBoost & 0.505 & 0.061 & 0.497 & 0.078 \\ \midrule
+Macro Only & Logistic & 0.850 & 0.106 & 0.857 & 0.349 \\
+& RandomForest & 0.701 & 0.055 & 0.503 & 0.133 \\
+& GradBoost & 0.827 & 0.213 & 0.573 & 0.172 \\
+& XGBoost & 0.642 & 0.057 & 0.500 & 0.000 \\ \midrule
+PCA + Macro & Logistic & 0.762 & 0.066 & 0.824 & 0.303 \\
+& RandomForest & 0.668 & 0.051 & 0.504 & 0.089 \\
+& GradBoost & 0.915 & 0.377 & 0.731 & 0.294 \\
+& XGBoost & 0.860 & 0.107 & 0.530 & 0.109 \\ \midrule
+PCA Macro Extras & Logistic & 0.801 & 0.043 & 0.828 & 0.149 \\
+& RandomForest & 0.768 & 0.037 & 0.807 & 0.135 \\
+& GradBoost & 0.669 & 0.026 & 0.407 & 0.000 \\
+& XGBoost & 0.681 & 0.027 & 0.370 & 0.000 \\ \bottomrule
+\end{tabular}
+\end{table}
 
 
 \subsection{Scenario Analysis: COVID-19 and the Global Financial Crisis}
+The analysis identifies a stark \textbf{Regime Dependence}:
+\begin{itemize}
+    \item \textbf{Financial Signal Victory}: During endogenous crises like 2008, Yield PCA factors successfully capture liquidity crunches with high precision.
+    \item \textbf{Financial Signal Failure}: During exogenous shocks like COVID-19, the yield curve fails completely, and only real-sector macro data (Unemployment, Industrial Production) reacts fast enough.
+\end{itemize}
 
-To assess regime dependence, models are evaluated separately on the COVID-19 recession (2019--2021) and the Global Financial Crisis (2007--2009). Figures~\ref{fig:covid-f2} and~\ref{fig:gfc-f2} report F2 scores, emphasizing recall, while Figures~\ref{fig:covid-pr} and~\ref{fig:gfc-pr} report precision--recall AUC.
+
+\begin{itemize}
+    \item \textbf{Regime-Switching Ensemble}: Implement a meta-model that weighs the Yield Curve model higher during monetary tightening and switches to Macro models during real-sector volatility.
+    \item \textbf{High-Frequency Data}: Integrate weekly jobless claims or credit card spending to bridge the gap during "sudden stop" recessions where monthly data lags.
+    \item \textbf{ACM Decomposition}: Isolate the "Risk-Neutral Slope" from the "Term Premium" to ensure robustness against QE distortions.
+\end{itemize}
+
+To assess regime dependence, models are evaluated separately on the COVID-19 recession (2019--2021) and the Global Financial Crisis (2007--2009). Figure \ref{fig:importance} report Variable Importance,  while Figures~\ref{fig:covid-pr} and~\ref{fig:gfc-pr} report precision--recall AUC.
 
 \begin{figure}[H]
     \centering
@@ -68,7 +179,7 @@ To assess regime dependence, models are evaluated separately on the COVID-19 rec
     \label{fig:importance}
 \end{figure}
 
-The feature importance analysis demonstrates a clear divergence between the two economic regimes, validating the paper's core finding that recession signals are structurally dependent on the nature of the crisis. During the Global Financial Crisis (GFC), the slope factor (PC2) and the spread\_10y\_3m represent the most critical variables for the majority of models, particularly the Logistic and ElasticNet estimators. This dominance aligns with the characterization of the GFC as a financially driven recession where the erosion of the term premium and subsequent yield curve inversion served as primary barometers. In contrast, the COVID-19 scenario reveals a shift in importance toward PC1 (Level) and PC3 (Curvature), illustrating a structural break from traditional signals. The heightened relevance of the curvature factor (PC3) in the COVID-19 plot reflects the episodic spikes caused by intense policy intervention and stimulus programs that distorted the expectations-driven signals of the yield curve. These visual results provide empirical backing for the rolling PCA diagnostics, which show significant factor loading drift during these periods and underscore why models must be regime-aware to predict transitions effectively.
+The feature importance analysis in demonstrates a clear divergence between the two economic regimes, validating the paper's core finding that recession signals are structurally dependent on the nature of the crisis. During the Global Financial Crisis (GFC), the slope factor (PC2) and the spread\_10y\_3m represent the most critical variables for the majority of models, particularly the Logistic and ElasticNet estimators. This dominance aligns with the characterization of the GFC as a financially driven recession where the erosion of the term premium and subsequent yield curve inversion served as primary barometers. In contrast, the COVID-19 scenario reveals a shift in importance toward PC1 (Level) and PC3 (Curvature), illustrating a structural break from traditional signals. The heightened relevance of the curvature factor (PC3) in the COVID-19 plot reflects the episodic spikes caused by intense policy intervention and stimulus programs that distorted the expectations-driven signals of the yield curve. These visual results provide empirical backing for the rolling PCA diagnostics, which show significant factor loading drift during these periods and underscore why models must be regime-aware to predict transitions effectively.
 
 \begin{figure}[H]
     \centering
@@ -84,10 +195,6 @@ The feature importance analysis demonstrates a clear divergence between the two 
     \label{fig:gfc-pr}
 \end{figure}
 
-Table~\ref{tab:scenario_results} summarizes scenario-specific results numerically.
-
-\input{tables/scenarios_adjusted.tex}
-
-The scenario-based evaluation reveals significant regime dependence in the predictive power of yield curve factors. During the Global Financial Crisis (GFC) of 2007–2009, models leveraging principal component analysis (PCA) factors consistently outperformed those using raw maturity spreads, underscoring the informative value of slope and curvature for financially driven recessions. Specifically, the Ridge model with yield\_pca features achieved a Balanced Accuracy of 0.833 and a Recall of 0.722, significantly higher than the 0.694 Balanced Accuracy and 0.444 Recall obtained using raw spreads. This alignment with traditional financial theory—where yield curve inversions effectively signal impending contractions—is further evidenced by the robust ROC\_AUC (0.938) and PR\_AUC (0.878) scores for the PCA-based Ridge model.
+The scenario-based evaluation reveals significant regime dependence in the predictive power of yield curve factors. During the Global Financial Crisis (GFC) of 2007–2009, models leveraging principal component analysis (PCA) factors consistently outperformed those using raw maturity spreads, underscoring the informative value of slope and curvature for financially driven recessions. Specifically, the Ridge model with yield\_pca features achieved a Balanced Accuracy of 0.833 and a Recall of 0.722, significantly higher than the 0.694 Balanced Accuracy and 0.444 Recall obtained using raw spreads. This alignment with traditional financial theorywhere yield curve inversions effectively signal impending contractionsis further evidenced by the robust ROC\_AUC (0.938) and PR\_AUC (0.878) scores for the PCA-based Ridge model.
 
 In contrast, the COVID-19 recession (2019–2021) represents a structural break where traditional yield signals were often lagging indicators of an abrupt, exogenous shock. Performance during this period was characterized by high Recall but lower Precision, reflecting the challenges of predicting a lockdown-induced downturn compared to an endogenous credit-cycle peak. While the ElasticNet and Logistic models with yield\_pca features both achieved a Recall of 1.000, their PR\_AUC values (0.174) were considerably lower than those seen during the GFC, with the exception of the Random Forest model which exhibited a perfect PR\_AUC of 1.000. This disparity reinforces the importance of regime-aware modeling, as unconventional monetary policies and term premium distortions in the post-2010 era have complicated the interpretation of latent yield factors.
