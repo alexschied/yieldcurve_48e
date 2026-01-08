@@ -43,7 +43,7 @@ Key questions:
 * **Regime dummies** (GFC, COVID, ZLB/QE)
 
 ### Models
-
+* Ridge and Elastic Net
 * Logistic regression (elastic net)
 * Random forest
 * Gradient boosting
