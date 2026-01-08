@@ -122,31 +122,7 @@ This will:
 
 ---
 
-## 6️⃣ Generating Tables and Figures
-
-### Export LaTeX tables
-
-```bash
-make tables
-```
-
-Tables are saved to:
-
-```
-reports/tables/
-```
-
-### Figures
-
-All figures are saved as **publication-ready PDF files** to:
-
-```
-reports/figures/
-```
-
----
-
-## 7️⃣ Building the LaTeX Report
+## 6️⃣ Building the LaTeX Report
 
 The final paper is fully automated.
 
@@ -168,38 +144,6 @@ which pulls in:
 
 ---
 
-## 8️⃣ Key Findings (Summary)
-
-* Yield curve PCA components capture substantially more information than simple spreads.
-* Combining yield PCA with macroeconomic variables improves predictive performance.
-* Models perform well during the GFC but deteriorate during COVID, highlighting:
-
-  * The limits of low-frequency macro predictors
-  * The challenge of forecasting sudden, exogenous shocks
-* Time-respecting validation materially affects reported performance.
-
----
-
-## 9️⃣ Notes on COVID and Model Limitations
-
-COVID represents a structural break driven by an exogenous shock.
-Traditional yield curve and macro variables react with delay, especially at a 12-month forecast horizon.
-
-Potential extensions:
-
-* Mixed-frequency indicators (claims, financial stress indices)
-* Shorter horizons (3–6 months)
-* Real-time activity measures
-
----
-
-## 🔟 Citation and Use
-
-This repository is intended for academic and educational use.
-If you use or adapt this code, please cite appropriately.
-
----
-
-## 11️⃣ License
+## 7️⃣ License
 
 See `LICENSE` for details.
