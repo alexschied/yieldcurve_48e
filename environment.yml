@@ -12,6 +12,7 @@ dependencies:
   - statsmodels
   - jupyterlab
   - notebook
+  - shap
   - pyyaml
   - tqdm
   - pip
